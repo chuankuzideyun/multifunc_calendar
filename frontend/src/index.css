@@ -2,72 +2,254 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --spring-white:      #FFFFFF;   /* 主背景 */
+  --spring-green-light: #E8F5E9;  /* 嫩芽绿，卡片底色 / 用户气泡 */
+  --spring-green-mid:  #A5D6A7;   /* 叶绿，边框 / 强调线 */
+  --spring-green-text: #388E3C;   /* 绿色文字 */
+  --spring-green-dark: #1B5E20;   /* 深绿，用户气泡文字 */
+  --spring-yellow:     #FFF8E7;   /* 蛋黄，Agent 气泡底色 */
+  --spring-yellow-border: #FFECB3;/* 蛋黄边框 */
+  --spring-yellow-text: #5D4037;  /* 蛋黄上的文字 */
+  --spring-pink-light: #FCE4EC;   /* 樱花粉，拒绝按钮 / 待确认标签 */
+  --spring-pink-text:  #C2185B;   /* 粉色文字 */
+  --spring-page-bg:    #FAFDF8;   /* 页面底色，极浅绿白 */
+}
+
 body {
   margin: 0;
-  background-color: #0F172A; /* dark.bg */
-  color: #F8FAFC; /* dark.text */
+  background-color: var(--spring-page-bg);
+  color: var(--spring-green-dark);
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   overflow-x: hidden;
 }
 
-/* Custom scrollbars for slick dark UI */
+/* Custom scrollbars for spring fresh UI */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #1E293B;
+  background: var(--spring-page-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #475569;
+  background: var(--spring-green-mid);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748B;
+  background: var(--spring-green-text);
 }
 
-/* FullCalendar styling overrides for dark theme */
+/* Utility classes for Spring theme */
+.spring-card {
+  background: var(--spring-white);
+  border: 0.5px solid var(--spring-green-mid);
+  border-radius: 12px;
+}
+
+.spring-btn-primary {
+  background-color: var(--spring-green-light) !important;
+  color: var(--spring-green-text) !important;
+  border: 0.5px solid var(--spring-green-mid) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease;
+}
+.spring-btn-primary:hover {
+  background-color: var(--spring-green-mid) !important;
+  color: var(--spring-green-dark) !important;
+}
+
+.spring-btn-danger {
+  background-color: var(--spring-pink-light) !important;
+  color: var(--spring-pink-text) !important;
+  border: 0.5px solid var(--spring-pink-light) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease;
+}
+.spring-btn-danger:hover {
+  opacity: 0.9;
+}
+
+.spring-bubble-user {
+  background-color: var(--spring-green-light) !important;
+  color: var(--spring-green-dark) !important;
+  border-radius: 18px 18px 4px 18px !important;
+  border: none !important;
+}
+
+.spring-bubble-agent {
+  background-color: var(--spring-yellow) !important;
+  color: var(--spring-yellow-text) !important;
+  border: 0.5px solid var(--spring-yellow-border) !important;
+  border-radius: 4px 18px 18px 18px !important;
+}
+
+.spring-chat-input {
+  border: 1px solid var(--spring-green-mid) !important;
+  border-radius: 24px !important;
+  background: white !important;
+  padding: 10px 48px 10px 16px !important;
+  color: var(--spring-green-dark) !important;
+}
+.spring-chat-input::placeholder {
+  color: var(--spring-green-mid) !important;
+  opacity: 0.8;
+}
+.spring-chat-input:focus {
+  outline: none !important;
+  border-color: var(--spring-green-text) !important;
+  box-shadow: 0 0 0 2px var(--spring-green-light) !important;
+}
+
+.spring-voice-btn {
+  background-color: var(--spring-pink-light) !important;
+  color: var(--spring-pink-text) !important;
+  border-radius: 50% !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease;
+}
+.spring-voice-btn:hover {
+  opacity: 0.9;
+}
+
+.spring-voice-btn-active {
+  background-color: var(--spring-pink-light) !important;
+  color: var(--spring-pink-text) !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--spring-green-mid) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  animation: spring-pulse 1.5s infinite;
+}
+
+@keyframes spring-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(165, 214, 167, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(165, 214, 167, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(165, 214, 167, 0);
+  }
+}
+
+/* FullCalendar styling overrides for spring theme */
 .fc {
-  --fc-border-color: #334155 !important;
+  --fc-border-color: var(--spring-green-mid) !important;
   --fc-daygrid-event-dot-width: 8px !important;
-  color: #F8FAFC !important;
+  color: var(--spring-green-dark) !important;
 }
 
 .fc-theme-standard th {
-  border-color: #334155 !important;
-  background-color: #1E293B !important;
-  color: #94A3B8 !important;
+  border-color: var(--spring-green-mid) !important;
+  background-color: var(--spring-green-light) !important;
+  color: var(--spring-green-dark) !important;
   padding: 8px 0 !important;
   font-weight: 600 !important;
 }
 
 .fc-day {
-  background-color: #0F172A !important;
+  background-color: var(--spring-white) !important;
 }
 
-.fc-day-today {
-  background-color: rgba(59, 130, 246, 0.05) !important;
+.fc-timegrid-slot {
+  background-color: var(--spring-white) !important;
+  border-color: var(--spring-green-mid) !important;
+}
+
+.fc-daygrid-day.fc-day-today {
+  background-color: var(--spring-yellow) !important;
+}
+
+.fc-timegrid-col.fc-day-today {
+  background-color: var(--spring-yellow) !important;
+}
+
+.fc-toolbar-title {
+  color: var(--spring-green-text) !important;
+  font-weight: 500 !important;
 }
 
 .fc-button {
-  background-color: #1E293B !important;
-  border-color: #334155 !important;
-  color: #F8FAFC !important;
+  background: var(--spring-green-light) !important;
+  color: var(--spring-green-text) !important;
+  border: 0.5px solid var(--spring-green-mid) !important;
+  border-radius: 8px !important;
   font-weight: 500 !important;
   text-transform: capitalize !important;
 }
 
 .fc-button:hover {
-  background-color: #334155 !important;
-  border-color: #475569 !important;
+  background: var(--spring-green-mid) !important;
+  color: var(--spring-green-dark) !important;
+  border-color: var(--spring-green-text) !important;
 }
 
 .fc-button-active {
-  background-color: #3b82f6 !important;
-  border-color: #2563eb !important;
-  color: #ffffff !important;
+  background: var(--spring-green-text) !important;
+  border-color: var(--spring-green-dark) !important;
+  color: var(--spring-white) !important;
 }
 
 .fc-button:disabled {
   opacity: 0.5 !important;
+}
+
+.fc-button-group {
+  gap: 5px !important;
+}
+
+.fc-button-group > .fc-button {
+  margin-left: 0 !important;
+  border-radius: 8px !important;
+}
+
+/* Event Styling based on Data Attributes */
+.fc-event {
+  border-radius: 6px !important;
+  border-width: 0.5px !important;
+  padding: 1px !important;
+  transition: all 0.2s ease;
+  cursor: pointer !important;
+}
+
+.fc-event-main {
+  color: inherit !important;
+}
+
+.fc-event[data-source="gmail"] {
+  background-color: #E3F2FD !important;
+  border-color: #90CAF9 !important;
+  color: #1565C0 !important;
+}
+
+.fc-event[data-source="weather"] {
+  background-color: var(--spring-green-light) !important;
+  border-color: var(--spring-green-mid) !important;
+  color: var(--spring-green-dark) !important;
+}
+
+.fc-event[data-source="voice"] {
+  background-color: #EDE7F6 !important;
+  border-color: #CE93D8 !important;
+  color: #6A1B9A !important;
+}
+
+.fc-event[data-source="manual"] {
+  background-color: #F5F5F5 !important;
+  border-color: #BDBDBD !important;
+  color: #424242 !important;
+}
+
+.fc-event[data-status="pending"] {
+  border-style: dashed !important;
+  border-width: 1px !important;
+  opacity: 0.85;
 }

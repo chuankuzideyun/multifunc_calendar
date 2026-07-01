@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   Send, Mic, MicOff, RotateCcw, Sparkles, 
-  Trash2, Calendar, Mail, CloudSun, Check, X, AlertCircle 
+  Calendar, Mail, CloudSun, Check, X, AlertCircle 
 } from 'lucide-react';
 
 interface Message {
@@ -182,6 +182,16 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onEventCreated }) => {
       });
 
       if (!response.ok) {
+        if (response.status === 429) {
+          try {
+            const errData = await response.json();
+            if (errData.error === 'rate_limited') {
+              throw new Error('请稍后重试');
+            }
+          } catch (e: any) {
+            throw new Error(e.message || '请稍后重试');
+          }
+        }
         throw new Error(`Agent returned status ${response.status}`);
       }
 
@@ -246,6 +256,9 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onEventCreated }) => {
                     : m
                 ));
               } else if (data.type === 'error') {
+                if (data.error === 'rate_limited' || data.message === 'AI 服务繁忙，请稍后重试') {
+                  throw new Error('请稍后重试');
+                }
                 throw new Error(data.message);
               }
             } catch (jsonErr) {
@@ -294,7 +307,7 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onEventCreated }) => {
     const uniqueToolCalls = Array.from(new Set(actions.filter(a => a.type === 'tool_call').map(a => a.name)));
 
     return (
-      <div className="flex flex-wrap gap-1.5 mt-2 border-t border-dark-border/40 pt-2">
+      <div className="flex flex-wrap gap-1.5 mt-2 border-t border-[var(--spring-green-mid)]/45 pt-2">
         {uniqueToolCalls.map((toolName: any) => {
           let label = toolName;
           let Icon = Sparkles;
@@ -316,9 +329,9 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onEventCreated }) => {
           return (
             <span 
               key={toolName}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] text-blue-400 font-medium"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--spring-green-light)] border border-[var(--spring-green-mid)] text-[10px] text-[var(--spring-green-dark)] font-medium"
             >
-              <Icon className="w-3 h-3 animate-pulse" />
+              <Icon className="w-3 h-3 text-[var(--spring-green-dark)] animate-pulse" />
               {label}
             </span>
           );
@@ -328,22 +341,22 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onEventCreated }) => {
   };
 
   return (
-    <div className="bg-dark-card border border-dark-border rounded-2xl shadow-lg flex flex-col h-full overflow-hidden relative">
+    <div className="spring-card shadow-sm flex flex-col h-full overflow-hidden relative">
       {/* Header */}
-      <div className="border-b border-dark-border px-4 py-3 flex justify-between items-center bg-dark-bg/30">
+      <div className="border-b border-[var(--spring-green-mid)] px-4 py-3 flex justify-between items-center bg-[var(--spring-page-bg)] relative z-10">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[var(--spring-green-text)] animate-pulse" />
           <div>
-            <h3 className="font-semibold text-sm text-dark-text flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-purple-400" />
+            <h3 className="font-semibold text-sm text-[var(--spring-green-dark)] flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-[var(--spring-green-text)]" />
               Concierge AI Agent
             </h3>
-            <p className="text-[10px] text-dark-muted">Powered by Google ADK v2.0</p>
+            <p className="text-[10px] text-[var(--spring-green-text)]">Powered by Google ADK v2.0</p>
           </div>
         </div>
         <button
           onClick={handleResetSession}
-          className="p-1.5 hover:bg-dark-border rounded-lg text-dark-muted hover:text-rose-400 transition"
+          className="p-1.5 hover:bg-[var(--spring-green-light)] rounded-lg text-[var(--spring-green-text)] hover:text-[var(--spring-pink-text)] transition"
           title="Reset conversation session"
         >
           <RotateCcw className="w-4 h-4" />
@@ -351,7 +364,7 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onEventCreated }) => {
       </div>
 
       {/* Messages list */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[150px]">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[150px] relative z-10">
         {messages.map((msg, index) => {
           const isUser = msg.sender === 'user';
           const isAgent = msg.sender === 'agent';
@@ -359,47 +372,64 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onEventCreated }) => {
           return (
             <div 
               key={msg.id}
-              className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
+              className={`flex gap-2 items-start ${isUser ? 'justify-end' : 'justify-start'}`}
             >
-              <div
-                className={`text-sm px-4 py-2.5 rounded-2xl max-w-[85%] leading-relaxed shadow-sm ${
-                  isUser 
-                    ? 'bg-blue-600 text-white rounded-tr-none' 
-                    : 'bg-dark-bg border border-dark-border text-dark-text rounded-tl-none'
-                }`}
-              >
-                {/* Loader for typing / pending states */}
-                {isAgent && msg.isPending && !msg.text ? (
-                  <div className="flex items-center gap-1 py-1 px-1.5">
-                    <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                ) : (
-                  <p className="whitespace-pre-line">{msg.text}</p>
-                )}
-
-                {/* Show actions taken */}
-                {isAgent && renderActions(msg.actionsTaken)}
-              </div>
-
-              {/* Confirm/Cancel Buttons when agent requests approval */}
-              {isAgent && isConfirmationMessage(msg) && isLatestMessage(index) && (
-                <div className="flex gap-2 mt-2 animate-in fade-in duration-200">
-                  <button
-                    onClick={() => handleSend("是的，请创建日程。")}
-                    className="flex items-center gap-1 px-3 py-1 bg-green-600 hover:bg-green-500 text-white text-xs font-semibold rounded-lg shadow transition"
-                  >
-                    <Check className="w-3.5 h-3.5" /> Confirm
-                  </button>
-                  <button
-                    onClick={() => handleSend("不用了，谢谢。")}
-                    className="flex items-center gap-1 px-3 py-1 bg-dark-border hover:bg-zinc-700 text-dark-text text-xs font-semibold rounded-lg border border-dark-border transition"
-                  >
-                    <X className="w-3.5 h-3.5" /> Cancel
-                  </button>
+              {isAgent && (
+                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm" style={{ background: 'var(--spring-pink-light)' }}>
+                  <svg className="w-5 h-5 text-[var(--spring-pink-text)]" viewBox="0 0 24 24" fill="currentColor">
+                    <g transform="translate(12,12) scale(0.9)">
+                      <path d="M0,0 C-3,-6 -5,-10 0,-12 C5,-10 3,-6 0,0" />
+                      <path d="M0,0 C-3,-6 -5,-10 0,-12 C5,-10 3,-6 0,0" transform="rotate(72)" />
+                      <path d="M0,0 C-3,-6 -5,-10 0,-12 C5,-10 3,-6 0,0" transform="rotate(144)" />
+                      <path d="M0,0 C-3,-6 -5,-10 0,-12 C5,-10 3,-6 0,0" transform="rotate(216)" />
+                      <path d="M0,0 C-3,-6 -5,-10 0,-12 C5,-10 3,-6 0,0" transform="rotate(288)" />
+                      <circle cx="0" cy="0" r="1.5" fill="#FAFDF8" />
+                    </g>
+                  </svg>
                 </div>
               )}
+
+              <div className={`flex flex-col max-w-[85%] ${isUser ? 'items-end' : 'items-start'}`}>
+                <div
+                  className={`text-sm px-4 py-2.5 shadow-sm ${
+                    isUser 
+                      ? 'spring-bubble-user' 
+                      : 'spring-bubble-agent'
+                  }`}
+                >
+                  {/* Loader for typing / pending states */}
+                  {isAgent && msg.isPending && !msg.text ? (
+                    <div className="flex items-center gap-1 py-1 px-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[var(--spring-green-text)] animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 rounded-full bg-[var(--spring-green-text)] animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 rounded-full bg-[var(--spring-green-text)] animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  ) : (
+                    <p className="whitespace-pre-line">{msg.text}</p>
+                  )}
+
+                  {/* Show actions taken */}
+                  {isAgent && renderActions(msg.actionsTaken)}
+                </div>
+
+                {/* Confirm/Cancel Buttons when agent requests approval */}
+                {isAgent && isConfirmationMessage(msg) && isLatestMessage(index) && (
+                  <div className="flex gap-2 mt-2 animate-in fade-in duration-200">
+                    <button
+                      onClick={() => handleSend("是的，请创建日程。")}
+                      className="flex items-center gap-1 px-3 py-1 spring-btn-primary text-xs font-semibold rounded-lg shadow-sm"
+                    >
+                      <Check className="w-3.5 h-3.5" /> Confirm
+                    </button>
+                    <button
+                      onClick={() => handleSend("不用了，谢谢。")}
+                      className="flex items-center gap-1 px-3 py-1 spring-btn-danger text-xs font-semibold rounded-lg shadow-sm"
+                    >
+                      <X className="w-3.5 h-3.5" /> Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
@@ -408,52 +438,54 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onEventCreated }) => {
 
       {/* Errors display */}
       {error && (
-        <div className="px-4 py-2 bg-rose-500/15 border-t border-b border-rose-500/20 text-rose-400 flex items-center gap-2 text-xs">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+        <div className="px-4 py-2 bg-[var(--spring-pink-light)] border-t border-b border-[var(--spring-pink-light)] text-[var(--spring-pink-text)] flex items-center gap-2 text-xs relative z-10 animate-in fade-in duration-200">
+          <AlertCircle className="w-4 h-4 shrink-0 text-[var(--spring-pink-text)]" />
           <p className="truncate">{error}</p>
         </div>
       )}
 
       {/* Input Form */}
-      <div className="border-t border-dark-border p-3 bg-dark-bg/20 flex gap-2 items-center">
+      <div className="border-t border-[var(--spring-green-mid)] p-3 bg-[var(--spring-page-bg)] flex gap-2 items-center relative z-10">
         {/* Voice typing button */}
         {listening ? (
           <button
             onClick={stopListening}
-            className="p-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl shadow-md animate-pulse transition"
+            className="spring-voice-btn-active p-3 transition w-10.5 h-10.5 flex items-center justify-center"
             title="Stop listening"
           >
-            <MicOff className="w-4 h-4" />
+            <MicOff className="w-4.5 h-4.5" />
           </button>
         ) : (
           <button
             onClick={startListening}
-            className="p-3 bg-dark-border hover:bg-zinc-700 text-dark-muted hover:text-dark-text rounded-xl border border-dark-border transition"
+            className="spring-voice-btn p-3 transition w-10.5 h-10.5 flex items-center justify-center"
             title="Start voice typing"
           >
-            <Mic className="w-4 h-4" />
+            <Mic className="w-4.5 h-4.5" />
           </button>
         )}
 
-        {/* Text Input */}
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyPress}
-          placeholder="Ask me to sync inbox, weather run, or edit calendar..."
-          className="flex-1 bg-dark-bg border border-dark-border rounded-xl px-3 py-2.5 text-sm text-dark-text focus:outline-none focus:border-purple-500 placeholder-dark-muted transition"
-          disabled={loading}
-        />
-
-        {/* Send Button */}
-        <button
-          onClick={() => handleSend(input)}
-          disabled={!input.trim() || loading}
-          className="p-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white rounded-xl shadow-md shadow-purple-600/10 hover:scale-105 active:scale-100 disabled:scale-100 transition duration-150 flex items-center justify-center"
-        >
-          <Send className="w-4 h-4" />
-        </button>
+        {/* Text Input Container */}
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder="Ask me to sync inbox, weather run, or edit calendar..."
+            className="w-full spring-chat-input transition"
+            disabled={loading}
+          />
+          {/* Send Button absolute-positioned inside the input box on the right */}
+          <button
+            onClick={() => handleSend(input)}
+            disabled={!input.trim() || loading}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2 text-[var(--spring-green-text)] hover:text-[var(--spring-green-dark)] disabled:opacity-40 transition duration-150 flex items-center justify-center"
+            title="Send Message"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

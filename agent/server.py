@@ -3,7 +3,7 @@ import json
 import traceback
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 import uvicorn
 from dotenv import load_dotenv
@@ -14,6 +14,7 @@ load_dotenv()
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.agents.run_config import RunConfig, StreamingMode
+from google.adk.models.google_llm import _ResourceExhaustedError
 from google.genai import types
 from concierge_agent import root_agent
 from concierge_agent.context import current_user_id
@@ -92,11 +93,24 @@ async def chat(request: ChatRequest):
             actions_taken=actions_taken,
             session_id=request.session_id
         )
+    except _ResourceExhaustedError as e:
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=429,
+            content={
+                "error": "rate_limited",
+                "message": "AI 服务繁忙，请稍后重试",
+                "retry_after": 40
+            }
+        )
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        current_user_id.reset(token)
+        try:
+            current_user_id.reset(token)
+        except ValueError:
+            pass
 
 @app.post("/chat/stream")
 async def chat_stream(request: ChatRequest):
@@ -152,10 +166,15 @@ async def chat_stream(request: ChatRequest):
             
             # Yield the final summary event
             yield f"data: {json.dumps({'type': 'final', 'reply': accumulated_reply, 'actions_taken': actions_taken, 'session_id': request.session_id})}\n\n"
+        except _ResourceExhaustedError as e:
+            yield f"data: {json.dumps({'type': 'error', 'error': 'rate_limited', 'message': 'AI 服务繁忙，请稍后重试', 'retry_after': 40})}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
         finally:
-            current_user_id.reset(token)
+            try:
+                current_user_id.reset(token)
+            except ValueError:
+                pass
             
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 

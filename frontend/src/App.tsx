@@ -97,10 +97,10 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-bg text-dark-text flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--spring-page-bg)] text-[var(--spring-green-dark)] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-dark-muted font-medium">Loading session...</p>
+          <div className="w-10 h-10 border-4 border-[var(--spring-green-text)] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-[var(--spring-green-text)] font-medium">Loading session...</p>
         </div>
       </div>
     );
@@ -109,25 +109,25 @@ function AppContent() {
   // Login Landing Page
   if (!user) {
     return (
-      <div className="min-h-screen bg-dark-bg text-dark-text flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-[var(--spring-page-bg)] text-[var(--spring-green-dark)] flex items-center justify-center p-4 relative overflow-hidden">
         {/* Glow Effects */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--spring-green-mid)]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--spring-pink-light)]/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="w-full max-w-md bg-dark-card/60 backdrop-blur-md border border-dark-border rounded-3xl p-8 text-center shadow-2xl relative z-10">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20 mx-auto mb-6">
-            <Calendar className="w-9 h-9 text-white" />
+        <div className="w-full max-w-md bg-white border border-[var(--spring-green-mid)] rounded-3xl p-8 text-center shadow-xl relative z-10">
+          <div className="w-16 h-16 bg-[var(--spring-green-light)] border border-[var(--spring-green-mid)] rounded-2xl flex items-center justify-center shadow-md mx-auto mb-6">
+            <Calendar className="w-9 h-9 text-[var(--spring-green-dark)]" />
           </div>
 
-          <h2 className="text-3xl font-extrabold text-white tracking-tight">Smart Schedule Assistant</h2>
-          <p className="text-dark-muted text-sm mt-3 mb-8 leading-relaxed">
+          <h2 className="text-3xl font-extrabold text-[var(--spring-green-dark)] tracking-tight">Smart Schedule Assistant</h2>
+          <p className="text-[var(--spring-green-text)] text-sm mt-3 mb-8 leading-relaxed">
             A minimalist, secure, and intelligent schedule integration hub.<br />
             Automatically extract schedules from Gmail, plan weekend running sessions based on weather, and create manual events instantly using voice commands.
           </p>
 
           <button
             onClick={loginWithGoogle}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded-2xl shadow-xl hover:scale-[1.01] transition active:scale-100"
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-[var(--spring-green-light)] text-[var(--spring-green-dark)] border border-[var(--spring-green-mid)] font-bold rounded-2xl shadow-md hover:scale-[1.01] transition active:scale-100"
           >
             {/* Custom Google logo */}
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -151,7 +151,7 @@ function AppContent() {
             Sign in with Google
           </button>
 
-          <p className="text-[10px] text-dark-muted mt-6 leading-normal">
+          <p className="text-[10px] text-[var(--spring-green-text)]/75 mt-6 leading-normal">
             By signing in, you authorize this application to read your Gmail messages (read-only) and manage your Google Calendar.
           </p>
         </div>
@@ -163,17 +163,17 @@ function AppContent() {
     <Layout onOpenSettings={() => setSettingsOpen(true)}>
       {/* Onboarding / Location Alert banner */}
       {!user.location && (
-        <div className="mb-6 p-4 bg-amber-500/15 border border-amber-500/30 text-amber-400 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+        <div className="mb-6 p-4 bg-[var(--spring-yellow)] border border-[var(--spring-yellow-border)] text-[var(--spring-yellow-text)] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md relative z-10 overflow-hidden">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="w-6 h-6 shrink-0" />
+            <AlertTriangle className="w-6 h-6 shrink-0 text-[var(--spring-yellow-text)]" />
             <div>
               <p className="font-semibold text-sm">Setup Reminder: Location Not Set</p>
-              <p className="text-xs text-amber-400/80 mt-0.5">Please configure your current city name in settings so we can automatically schedule weekend runs for you!</p>
+              <p className="text-xs text-[var(--spring-yellow-text)]/90 mt-0.5">Please configure your current city name in settings so we can automatically schedule weekend runs for you!</p>
             </div>
           </div>
           <button
             onClick={() => setSettingsOpen(true)}
-            className="px-4 py-1.5 bg-amber-500 text-slate-950 hover:bg-amber-400 text-xs font-bold rounded-xl transition duration-200"
+            className="px-4 py-1.5 spring-btn-primary text-xs font-bold rounded-xl transition duration-200"
           >
             Configure Now
           </button>
@@ -204,8 +204,8 @@ function AppContent() {
         {/* Right Side: Big Calendar View */}
         <div className="lg:col-span-2">
           {eventsLoading && events.length === 0 ? (
-            <div className="bg-dark-card border border-dark-border rounded-2xl p-8 flex items-center justify-center min-h-[500px]">
-              <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <div className="spring-card p-8 flex items-center justify-center min-h-[500px]">
+              <div className="w-10 h-10 border-4 border-[var(--spring-green-text)] border-t-transparent rounded-full animate-spin" />
             </div>
           ) : (
             <CalendarView
@@ -220,10 +220,10 @@ function AppContent() {
       {/* Floating Action Button for Manual creation */}
       <button
         onClick={() => setCreateModalOpen(true)}
-        className="fixed bottom-6 right-6 z-30 p-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-2xl hover:scale-105 active:scale-100 flex items-center justify-center transition duration-200"
+        className="fixed bottom-6 right-6 z-30 p-4 spring-btn-primary rounded-full shadow-2xl hover:scale-105 active:scale-100 flex items-center justify-center transition duration-200"
         title="新建日程"
       >
-        <Plus className="w-6 h-6" />
+        <Plus className="w-6 h-6 text-[var(--spring-green-dark)]" />
       </button>
 
       {/* Modals */}

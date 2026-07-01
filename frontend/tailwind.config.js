@@ -8,11 +8,11 @@ export default {
     extend: {
       colors: {
         dark: {
-          bg: '#0F172A',     // Slate 900
-          card: '#1E293B',   // Slate 800
-          border: '#334155', // Slate 700
-          text: '#F8FAFC',   // Slate 50
-          muted: '#94A3B8'   // Slate 400
+          bg: 'var(--spring-page-bg)',
+          card: 'var(--spring-white)',
+          border: 'var(--spring-green-mid)',
+          text: 'var(--spring-green-dark)',
+          muted: 'var(--spring-green-text)'
         }
       }
     },
