@@ -1,0 +1,11 @@
+google-adk>=2.0.0
+google-auth
+google-auth-oauthlib
+google-api-python-client
+fastapi
+uvicorn
+python-dotenv
+httpx
+requests
+cryptography
+psycopg2-binary

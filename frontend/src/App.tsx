@@ -5,7 +5,7 @@ import { Layout } from './components/Layout';
 import { CalendarView } from './components/CalendarView';
 import { PendingQueue } from './components/PendingQueue';
 import type { EventItem } from './components/EventItem';
-import { VoiceAssistant } from './components/VoiceAssistant';
+import { AgentChat } from './components/AgentChat';
 import { SettingsPanel } from './components/SettingsPanel';
 import { ManualEventModal } from './components/ManualEventModal';
 import { Calendar, Plus, AlertTriangle } from 'lucide-react';
@@ -196,8 +196,8 @@ function AppContent() {
             />
           </div>
 
-          <div className="h-[380px]">
-            <VoiceAssistant onSuccess={fetchEvents} />
+          <div className="h-[450px]">
+            <AgentChat onEventCreated={fetchEvents} />
           </div>
         </div>
 
