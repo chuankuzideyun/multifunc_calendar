@@ -1,0 +1,31 @@
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/auth';
+import { parseVoiceTranscript } from '../services/gemini';
+
+/**
+ * Endpoint to parse a voice transcription string into structured event details.
+ */
+export async function parseVoiceInput(req: AuthenticatedRequest, res: Response) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthenticated.' });
+  }
+
+  const { transcript } = req.body;
+
+  if (!transcript || typeof transcript !== 'string') {
+    return res.status(400).json({ error: 'Transcript string is required in request body.' });
+  }
+
+  try {
+    // Reference date is user's current local date/time
+    // (We pass user timezone offset if available or standard server time)
+    const referenceDate = new Date();
+    
+    const parsedData = await parseVoiceTranscript(transcript, referenceDate);
+    
+    return res.json(parsedData);
+  } catch (error) {
+    console.error('[Voice Parse Controller Error]', error);
+    return res.status(500).json({ error: 'Failed to process voice transcript.' });
+  }
+}
