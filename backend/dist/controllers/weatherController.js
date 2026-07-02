@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.planWeekendRunForUser = planWeekendRunForUser;
-exports.triggerWeatherCheck = triggerWeatherCheck;
+exports.triggerWeatherCheck = exports.planWeekendRunForUser = void 0;
 const prisma_1 = require("../config/prisma");
 const google_1 = require("../services/google");
 const weather_1 = require("../services/weather");
@@ -180,6 +179,7 @@ async function planWeekendRunForUser(userId) {
         return { success: false, message: `Failed to evaluate weekend runs: ${error.message}` };
     }
 }
+exports.planWeekendRunForUser = planWeekendRunForUser;
 /**
  * Controller endpoint to manually trigger a weather scheduling evaluation.
  */
@@ -193,3 +193,4 @@ async function triggerWeatherCheck(req, res) {
     }
     return res.json(result);
 }
+exports.triggerWeatherCheck = triggerWeatherCheck;

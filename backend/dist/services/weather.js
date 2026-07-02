@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getWeekendWeather = getWeekendWeather;
-exports.checkRunningCriteria = checkRunningCriteria;
+exports.checkRunningCriteria = exports.getWeekendWeather = void 0;
 const env_1 = require("../config/env");
 /**
  * Fetches the 5-day / 3-hour weather forecast for a city and extracts the weekend morning forecasts.
@@ -62,6 +61,7 @@ async function getWeekendWeather(city) {
         throw error;
     }
 }
+exports.getWeekendWeather = getWeekendWeather;
 function parseForecastItem(item, localDate) {
     const temp = item.main?.temp;
     const pop = item.pop ?? 0;
@@ -81,3 +81,4 @@ function parseForecastItem(item, localDate) {
 function checkRunningCriteria(weather) {
     return weather.temp < 25 && !weather.hasRain && weather.pop < 0.3;
 }
+exports.checkRunningCriteria = checkRunningCriteria;

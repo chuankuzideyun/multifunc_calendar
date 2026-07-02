@@ -3,11 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.redirectToGoogle = redirectToGoogle;
-exports.handleGoogleCallback = handleGoogleCallback;
-exports.getMe = getMe;
-exports.updateSettings = updateSettings;
-exports.logout = logout;
+exports.logout = exports.updateSettings = exports.getMe = exports.handleGoogleCallback = exports.redirectToGoogle = void 0;
 const googleapis_1 = require("googleapis");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const env_1 = require("../config/env");
@@ -34,6 +30,7 @@ async function redirectToGoogle(req, res) {
     });
     return res.redirect(url);
 }
+exports.redirectToGoogle = redirectToGoogle;
 /**
  * Handles the Google OAuth callback, processes tokens, and establishes session.
  */
@@ -102,6 +99,7 @@ async function handleGoogleCallback(req, res) {
         return res.status(500).send('Authentication failed.');
     }
 }
+exports.handleGoogleCallback = handleGoogleCallback;
 /**
  * Returns currently logged-in user profile details.
  */
@@ -130,6 +128,7 @@ async function getMe(req, res) {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 }
+exports.getMe = getMe;
 /**
  * Updates user location settings.
  */
@@ -164,6 +163,7 @@ async function updateSettings(req, res) {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 }
+exports.updateSettings = updateSettings;
 /**
  * Logs out the user by clearing the JWT session cookie.
  */
@@ -175,3 +175,4 @@ async function logout(req, res) {
     });
     return res.json({ message: 'Logged out successfully.' });
 }
+exports.logout = logout;

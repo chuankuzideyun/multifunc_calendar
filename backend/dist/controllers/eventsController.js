@@ -1,10 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getEvents = getEvents;
-exports.createManualEvent = createManualEvent;
-exports.confirmEvent = confirmEvent;
-exports.rejectEvent = rejectEvent;
-exports.deleteEvent = deleteEvent;
+exports.deleteEvent = exports.rejectEvent = exports.confirmEvent = exports.createManualEvent = exports.getEvents = void 0;
 const prisma_1 = require("../config/prisma");
 const google_1 = require("../services/google");
 const googleapis_1 = require("googleapis");
@@ -31,6 +27,7 @@ async function getEvents(req, res) {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 }
+exports.getEvents = getEvents;
 /**
  * Creates a manual event directly. It is automatically confirmed and written to Google Calendar.
  */
@@ -88,6 +85,7 @@ async function createManualEvent(req, res) {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 }
+exports.createManualEvent = createManualEvent;
 /**
  * Confirms a pending event (from Gmail or Voice).
  * Writes the event to Google Calendar and changes status to confirmed.
@@ -154,6 +152,7 @@ async function confirmEvent(req, res) {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 }
+exports.confirmEvent = confirmEvent;
 /**
  * Rejects a pending event. Updates status to rejected.
  */
@@ -185,6 +184,7 @@ async function rejectEvent(req, res) {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 }
+exports.rejectEvent = rejectEvent;
 /**
  * Deletes an event. If it is confirmed and has a googleEventId, delete it from Google Calendar.
  */
@@ -233,3 +233,4 @@ async function deleteEvent(req, res) {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 }
+exports.deleteEvent = deleteEvent;

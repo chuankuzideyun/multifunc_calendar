@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.redisClient = void 0;
-exports.connectRedis = connectRedis;
+exports.connectRedis = exports.redisClient = void 0;
 const redis_1 = require("redis");
 const env_1 = require("../config/env");
 exports.redisClient = (0, redis_1.createClient)({
@@ -26,3 +25,4 @@ async function connectRedis() {
         await exports.redisClient.connect();
     }
 }
+exports.connectRedis = connectRedis;

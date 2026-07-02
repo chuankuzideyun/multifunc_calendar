@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseEmailContent = parseEmailContent;
-exports.parseVoiceTranscript = parseVoiceTranscript;
+exports.parseVoiceTranscript = exports.parseEmailContent = void 0;
 const generative_ai_1 = require("@google/generative-ai");
 const env_1 = require("../config/env");
 const genAI = new generative_ai_1.GoogleGenerativeAI(env_1.env.GEMINI_API_KEY);
@@ -107,6 +106,7 @@ async function parseEmailContent(subject, body, emailDate) {
         return [];
     }
 }
+exports.parseEmailContent = parseEmailContent;
 /**
  * Parses a voice transcription text into structured event details.
  */
@@ -145,3 +145,4 @@ async function parseVoiceTranscript(transcript, referenceDate) {
         };
     }
 }
+exports.parseVoiceTranscript = parseVoiceTranscript;

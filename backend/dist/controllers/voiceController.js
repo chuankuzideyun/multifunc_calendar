@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseVoiceInput = parseVoiceInput;
+exports.parseVoiceInput = void 0;
 const gemini_1 = require("../services/gemini");
 /**
  * Endpoint to parse a voice transcription string into structured event details.
@@ -25,3 +25,4 @@ async function parseVoiceInput(req, res) {
         return res.status(500).json({ error: 'Failed to process voice transcript.' });
     }
 }
+exports.parseVoiceInput = parseVoiceInput;

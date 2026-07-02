@@ -3,8 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.encrypt = encrypt;
-exports.decrypt = decrypt;
+exports.decrypt = exports.encrypt = void 0;
 const crypto_1 = __importDefault(require("crypto"));
 const env_1 = require("../config/env");
 const ALGORITHM = 'aes-256-gcm';
@@ -22,6 +21,7 @@ function encrypt(text) {
     const authTag = cipher.getAuthTag().toString('hex');
     return `${iv.toString('hex')}:${authTag}:${encrypted}`;
 }
+exports.encrypt = encrypt;
 /**
  * Decrypts a string formatted as "ivHex:authTagHex:ciphertextHex" using AES-256-GCM.
  */
@@ -41,3 +41,4 @@ function decrypt(encryptedData) {
     decrypted += decipher.final('utf8');
     return decrypted;
 }
+exports.decrypt = decrypt;

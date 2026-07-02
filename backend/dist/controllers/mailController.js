@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.syncGmail = syncGmail;
+exports.syncGmail = void 0;
 const prisma_1 = require("../config/prisma");
 const google_1 = require("../services/google");
 const gemini_1 = require("../services/gemini");
@@ -115,3 +115,4 @@ async function syncGmail(req, res) {
         return res.status(500).json({ error: 'Failed to synchronize Gmail.' });
     }
 }
+exports.syncGmail = syncGmail;

@@ -1,11 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOAuth2Client = getOAuth2Client;
-exports.createGoogleCalendarEvent = createGoogleCalendarEvent;
-exports.checkCalendarConflict = checkCalendarConflict;
-exports.checkDuplicateWeatherRun = checkDuplicateWeatherRun;
-exports.fetchRecentEmails = fetchRecentEmails;
-exports.getEmailDetail = getEmailDetail;
+exports.getEmailDetail = exports.fetchRecentEmails = exports.checkDuplicateWeatherRun = exports.checkCalendarConflict = exports.createGoogleCalendarEvent = exports.getOAuth2Client = void 0;
 const googleapis_1 = require("googleapis");
 const env_1 = require("../config/env");
 const crypto_1 = require("./crypto");
@@ -19,6 +14,7 @@ function getOAuth2Client(encryptedRefreshToken) {
     });
     return oauth2Client;
 }
+exports.getOAuth2Client = getOAuth2Client;
 /**
  * Creates an event in Google Calendar.
  */
@@ -41,6 +37,7 @@ async function createGoogleCalendarEvent(oauth2Client, eventDetails) {
     });
     return response.data;
 }
+exports.createGoogleCalendarEvent = createGoogleCalendarEvent;
 /**
  * Checks if the user has any events in the specified time slot.
  * Returns true if there is a conflict.
@@ -64,6 +61,7 @@ async function checkCalendarConflict(oauth2Client, startTime, endTime) {
         return true;
     }
 }
+exports.checkCalendarConflict = checkCalendarConflict;
 /**
  * Checks Google Calendar for an existing event with matching extended properties
  * to prevent duplicate creation of automated runs.
@@ -86,6 +84,7 @@ async function checkDuplicateWeatherRun(oauth2Client, startTime, endTime) {
         return false;
     }
 }
+exports.checkDuplicateWeatherRun = checkDuplicateWeatherRun;
 /**
  * Fetches recent emails pre-filtered by date and invitation keywords.
  */
@@ -110,6 +109,7 @@ async function fetchRecentEmails(oauth2Client, lastNDays = 7) {
         return [];
     }
 }
+exports.fetchRecentEmails = fetchRecentEmails;
 /**
  * Retrieves details for a specific email message.
  */
@@ -139,3 +139,4 @@ async function getEmailDetail(oauth2Client, messageId) {
         throw error;
     }
 }
+exports.getEmailDetail = getEmailDetail;

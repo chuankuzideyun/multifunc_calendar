@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.requireAuth = requireAuth;
+exports.requireAuth = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const env_1 = require("../config/env");
 const prisma_1 = require("../config/prisma");
@@ -31,3 +31,4 @@ async function requireAuth(req, res, next) {
         return res.status(401).json({ error: 'Invalid or expired session. Please login again.' });
     }
 }
+exports.requireAuth = requireAuth;
