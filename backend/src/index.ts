@@ -20,8 +20,8 @@ app.use(cookieParser());
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    process.env.FRONTEND_URL || 'https://*.vercel.app'
-  ],
+    process.env.FRONTEND_URL
+  ].filter(Boolean) as string[],
   credentials: true // Crucial for httpOnly cookie storage
 }));
 
