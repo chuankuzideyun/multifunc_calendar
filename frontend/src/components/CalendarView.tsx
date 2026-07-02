@@ -98,6 +98,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ events, onDeleteEven
             if (status) {
               info.el.setAttribute('data-status', status);
             }
+            if (source === 'weather' && status === 'pending') {
+              info.el.style.setProperty('background', 'white', 'important');
+              info.el.style.setProperty('border', '2px dashed #A5D6A7', 'important');
+              info.el.style.setProperty('color', '#388E3C', 'important');
+              info.el.style.setProperty('border-radius', '6px', 'important');
+              
+              info.el.style.background = 'white';
+              info.el.style.border = '2px dashed #A5D6A7';
+              info.el.style.color = '#388E3C';
+              info.el.style.borderRadius = '6px';
+            }
           }}
           allDaySlot={false}
           firstDay={1} // Monday

@@ -86,8 +86,8 @@ function AppContent() {
     setSyncingWeather(true);
     try {
       const res = await apiFetch('/weather/check-weekend', { method: 'POST' });
-      alert(res.message || 'Weekend run planning completed.');
       await fetchEvents();
+      return { suggestionsCreated: res.suggestionsCreated || 0 };
     } catch (err: any) {
       alert(`Failed to plan run: ${err.message}`);
     } finally {

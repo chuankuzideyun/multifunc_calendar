@@ -1,210 +1,91 @@
 import { Response } from 'express';
 import { prisma } from '../config/prisma';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { getOAuth2Client, checkCalendarConflict, checkDuplicateWeatherRun, createGoogleCalendarEvent } from '../services/google';
-import { getWeekendWeather, checkRunningCriteria } from '../services/weather';
+import { getFutureWeather } from '../services/weather';
 
 /**
- * Plans a weekend run (Saturday or Sunday 8:00-9:00 AM local time) for a user.
+ * Plans runs for the future 7 days (8:00-9:00 AM local time) for a user based on weather.
  * 1. Checks weather conditions.
- * 2. Checks for conflicts in Google Calendar.
- * 3. Checks for duplicates.
- * 4. Creates event in local DB and Google Calendar if conditions are met.
+ * 2. Checks for duplicate events in DB (same user, source: weather, same startTime, status in pending/confirmed).
+ * 3. Creates pending events in local DB if conditions are met.
  */
-export async function planWeekendRunForUser(userId: string): Promise<{
+export async function planFutureRunsForUser(userId: string): Promise<{
   success: boolean;
   message: string;
-  day?: 'Saturday' | 'Sunday';
-  event?: any;
+  suggestionsCreated: number;
+  forecast: any[];
 }> {
   const user = await prisma.user.findUnique({
     where: { id: userId }
   });
 
   if (!user) {
-    return { success: false, message: 'User not found.' };
+    return { success: false, message: 'User not found.', suggestionsCreated: 0, forecast: [] };
   }
 
   if (!user.location) {
     return {
       success: false,
-      message: 'Location is not set in settings. Please set your city to enable weekend run scheduling.'
+      message: 'Location is not set in settings. Please set your city to enable weather run scheduling.',
+      suggestionsCreated: 0,
+      forecast: []
     };
-  }
-
-  if (!user.googleRefreshTokenEncrypted) {
-    return { success: false, message: 'Google OAuth account is not connected.' };
   }
 
   try {
-    const forecast = await getWeekendWeather(user.location);
-    const oauthClient = getOAuth2Client(user.googleRefreshTokenEncrypted);
-    const timezoneOffsetMs = forecast.timezoneOffsetSeconds * 1000;
+    const forecast = await getFutureWeather(user.location);
+    let suggestionsCreated = 0;
 
-    const nowUtc = new Date();
-    // Convert current UTC time to user local time
-    const todayLocal = new Date(nowUtc.getTime() + timezoneOffsetMs);
-    const currentDay = todayLocal.getUTCDay(); // 0 (Sun) to 6 (Sat)
+    for (const day of forecast) {
+      if (day.suitable) {
+        // Check DB duplication (same day weather running events that are pending or confirmed)
+        const existingDbEvent = await prisma.event.findFirst({
+          where: {
+            userId: user.id,
+            source: 'weather',
+            status: { in: ['pending', 'confirmed'] },
+            startTime: day.startTime
+          }
+        });
 
-    // Calculate days to Saturday and Sunday
-    let daysToSat = (6 - currentDay + 7) % 7;
-    let daysToSun = (7 - currentDay + 7) % 7;
-
-    // If it is already Saturday or Sunday morning past 9:00 AM local time, schedule for the following weekend.
-    if (daysToSat === 0 && todayLocal.getUTCHours() >= 9) {
-      daysToSat = 7;
-    }
-    if (daysToSun === 0 && todayLocal.getUTCHours() >= 9) {
-      daysToSun = 7;
-    }
-
-    // --- EVALUATE SATURDAY ---
-    if (forecast.saturday && checkRunningCriteria(forecast.saturday)) {
-      const satLocal = new Date(todayLocal);
-      satLocal.setUTCDate(todayLocal.getUTCDate() + daysToSat);
-      satLocal.setUTCHours(8, 0, 0, 0); // 8:00 AM local
-
-      const satStartUtc = new Date(satLocal.getTime() - timezoneOffsetMs);
-      const satEndUtc = new Date(satStartUtc.getTime() + 60 * 60 * 1000); // 9:00 AM local
-
-      // Check DB duplication
-      const existingDbEvent = await prisma.event.findFirst({
-        where: {
-          userId: user.id,
-          source: 'weather',
-          startTime: satStartUtc
-        }
-      });
-
-      if (!existingDbEvent) {
-        // Check Google Calendar duplication & conflicts
-        const isGoogleDuplicate = await checkDuplicateWeatherRun(oauthClient, satStartUtc, satEndUtc);
-        const isConflict = await checkCalendarConflict(oauthClient, satStartUtc, satEndUtc);
-
-        if (!isGoogleDuplicate && !isConflict) {
-          // Match! Create Saturday morning run.
-          const description = `Weekend morning run (automatically scheduled). Temp: ${forecast.saturday.temp}°C, Weather conditions: ${forecast.saturday.description}.`;
-          
-          const event = await prisma.event.create({
+        if (!existingDbEvent) {
+          // Create weather suggestion event in DB as pending
+          await prisma.event.create({
             data: {
               userId: user.id,
-              title: 'Morning Run 🏃‍♂️',
-              description,
-              startTime: satStartUtc,
-              endTime: satEndUtc,
+              title: '晨跑',
+              description: `天气建议: ${day.reason}`,
+              startTime: day.startTime,
+              endTime: day.endTime,
               location: user.location,
               source: 'weather',
-              status: 'confirmed'
+              status: 'pending',
+              confidence: 0.95
             }
           });
-
-          try {
-            const googleEvent = await createGoogleCalendarEvent(oauthClient, {
-              title: 'Morning Run 🏃‍♂️',
-              description,
-              startTime: satStartUtc,
-              endTime: satEndUtc,
-              location: user.location,
-              extendedProperties: {
-                private: { source: 'auto-weather-run' }
-              }
-            });
-
-            await prisma.event.update({
-              where: { id: event.id },
-              data: { googleEventId: googleEvent.id }
-            });
-          } catch (err) {
-            console.error('[Google Calendar Weather Sync Failed]', err);
-          }
-
-          return {
-            success: true,
-            message: `Successfully scheduled Saturday morning run in ${user.location}. Temp: ${forecast.saturday.temp}°C.`,
-            day: 'Saturday',
-            event
-          };
+          suggestionsCreated++;
         }
       }
     }
 
-    // --- EVALUATE SUNDAY ---
-    if (forecast.sunday && checkRunningCriteria(forecast.sunday)) {
-      const sunLocal = new Date(todayLocal);
-      sunLocal.setUTCDate(todayLocal.getUTCDate() + daysToSun);
-      sunLocal.setUTCHours(8, 0, 0, 0); // 8:00 AM local
-
-      const sunStartUtc = new Date(sunLocal.getTime() - timezoneOffsetMs);
-      const sunEndUtc = new Date(sunStartUtc.getTime() + 60 * 60 * 1000); // 9:00 AM local
-
-      // Check DB duplication
-      const existingDbEvent = await prisma.event.findFirst({
-        where: {
-          userId: user.id,
-          source: 'weather',
-          startTime: sunStartUtc
-        }
-      });
-
-      if (!existingDbEvent) {
-        // Check Google Calendar duplication & conflicts
-        const isGoogleDuplicate = await checkDuplicateWeatherRun(oauthClient, sunStartUtc, sunEndUtc);
-        const isConflict = await checkCalendarConflict(oauthClient, sunStartUtc, sunEndUtc);
-
-        if (!isGoogleDuplicate && !isConflict) {
-          // Match! Create Sunday morning run.
-          const description = `Weekend morning run (automatically scheduled). Temp: ${forecast.sunday.temp}°C, Weather conditions: ${forecast.sunday.description}.`;
-
-          const event = await prisma.event.create({
-            data: {
-              userId: user.id,
-              title: 'Morning Run 🏃‍♂️',
-              description,
-              startTime: sunStartUtc,
-              endTime: sunEndUtc,
-              location: user.location,
-              source: 'weather',
-              status: 'confirmed'
-            }
-          });
-
-          try {
-            const googleEvent = await createGoogleCalendarEvent(oauthClient, {
-              title: 'Morning Run 🏃‍♂️',
-              description,
-              startTime: sunStartUtc,
-              endTime: sunEndUtc,
-              location: user.location,
-              extendedProperties: {
-                private: { source: 'auto-weather-run' }
-              }
-            });
-
-            await prisma.event.update({
-              where: { id: event.id },
-              data: { googleEventId: googleEvent.id }
-            });
-          } catch (err) {
-            console.error('[Google Calendar Weather Sync Failed]', err);
-          }
-
-          return {
-            success: true,
-            message: `Successfully scheduled Sunday morning run in ${user.location}. Temp: ${forecast.sunday.temp}°C.`,
-            day: 'Sunday',
-            event
-          };
-        }
-      }
-    }
+    const message = suggestionsCreated > 0
+      ? `天气检查完成，在未来7天内为您找到了 ${suggestionsCreated} 个合适晨跑的时间段，已放入待处理列表。`
+      : '天气检查完成，但未来7天内没有合适的天气或已有相同的晨跑规划。';
 
     return {
-      success: false,
-      message: `Checked weather for ${user.location} but no suitable weekend slots were available (due to temperature >= 25°C, rain/precipitation probability >= 30%, existing schedule conflicts, or already scheduled).`
+      success: true,
+      message,
+      suggestionsCreated,
+      forecast
     };
   } catch (error: any) {
-    console.error('[planWeekendRunForUser Error]', error);
-    return { success: false, message: `Failed to evaluate weekend runs: ${error.message}` };
+    console.error('[planFutureRunsForUser Error]', error);
+    return {
+      success: false,
+      message: `Failed to evaluate future runs: ${error.message}`,
+      suggestionsCreated: 0,
+      forecast: []
+    };
   }
 }
 
@@ -216,11 +97,7 @@ export async function triggerWeatherCheck(req: AuthenticatedRequest, res: Respon
     return res.status(401).json({ error: 'Unauthenticated.' });
   }
 
-  const result = await planWeekendRunForUser(req.user.id);
+  const result = await planFutureRunsForUser(req.user.id);
   
-  if (!result.success) {
-    return res.status(200).json(result); // Return status 200 with result message even if no run was scheduled
-  }
-
   return res.json(result);
 }
