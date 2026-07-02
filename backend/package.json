@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "echo 'Skipping tsc, using tsx runtime'",
-    "start": "tsx src/index.ts",
+    "start": "node node_modules/tsx/dist/cli.mjs src/index.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy"
   },
