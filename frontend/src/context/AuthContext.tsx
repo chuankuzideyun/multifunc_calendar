@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { apiFetch } from '../utils/api';
+import { apiFetch, BASE_URL } from '../utils/api';
 
 interface User {
   id: string;
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loginWithGoogle = () => {
     // Redirect directly to Google OAuth route on backend
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    window.location.href = `${BASE_URL}/api/auth/google`;
   };
 
   const logout = async () => {

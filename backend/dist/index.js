@@ -54,7 +54,10 @@ const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({
-    origin: env_1.env.FRONTEND_URL,
+    origin: [
+        'http://localhost:5173',
+        process.env.FRONTEND_URL || 'https://*.vercel.app'
+    ],
     credentials: true // Crucial for httpOnly cookie storage
 }));
 // Apply global rate limiter

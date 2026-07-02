@@ -18,7 +18,10 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: env.FRONTEND_URL,
+  origin: [
+    'http://localhost:5173',
+    process.env.FRONTEND_URL || 'https://*.vercel.app'
+  ],
   credentials: true // Crucial for httpOnly cookie storage
 }));
 

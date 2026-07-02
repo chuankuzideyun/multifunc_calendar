@@ -171,7 +171,8 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onEventCreated }) => {
 
     try {
       // Connect to the FastAPI agent backend using SSE stream
-      const response = await fetch('http://localhost:8001/chat/stream', {
+      const agentUrl = import.meta.env.VITE_AGENT_URL || 'http://localhost:8001';
+      const response = await fetch(`${agentUrl}/chat/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
