@@ -64,7 +64,7 @@ export const PendingQueue: React.FC<PendingQueueProps> = ({
     setStatusMessage(null);
     const res = await onSyncWeather();
     if (res) {
-      setStatusMessage(`已检查未来7天天气，找到 ${res.suggestionsCreated} 个适合跑步的时间段`);
+      setStatusMessage(`Checked weather for the next 7 days, found ${res.suggestionsCreated} suitable running slots`);
       // Auto-clear after 5 seconds
       setTimeout(() => setStatusMessage(null), 5000);
     }
@@ -116,7 +116,7 @@ export const PendingQueue: React.FC<PendingQueueProps> = ({
           className="flex items-center justify-center gap-1.5 py-2 px-3 spring-btn-primary disabled:opacity-50 text-sm"
         >
           <CloudLightning className={`w-4 h-4 ${syncingWeather ? 'animate-spin' : ''}`} />
-          {syncingWeather ? 'Checking...' : '检查本周跑步天气'}
+          {syncingWeather ? 'Checking...' : 'Check Weekly Running Weather'}
         </button>
       </div>
 
@@ -133,10 +133,10 @@ export const PendingQueue: React.FC<PendingQueueProps> = ({
             const isWeather = event.source === 'weather';
             if (isWeather) {
               const dateObj = new Date(event.startTime);
-              const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+              const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
               const weekdayStr = weekdays[dateObj.getDay()];
               const cleanReason = event.description 
-                ? event.description.replace('天气建议: ', '').replace('，适合晨跑', '').replace(/，/g, ' ') 
+                ? event.description.replace('Weather suggestion: ', '').replace(', suitable for a morning run', '') 
                 : '';
               const subtitle = `${weekdayStr} · ${cleanReason}`;
 
@@ -151,7 +151,7 @@ export const PendingQueue: React.FC<PendingQueueProps> = ({
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-sm text-[var(--spring-green-dark)] truncate">
-                        建议晨跑
+                        Suggest Morning Run
                       </h4>
                       <p className="text-xs text-[var(--spring-green-text)] truncate mt-0.5 font-medium">
                         {subtitle}

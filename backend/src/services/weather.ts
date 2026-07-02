@@ -41,7 +41,7 @@ export async function getFutureWeather(city: string): Promise<WeatherSuggestion[
     const todayLocal = new Date(nowUtc.getTime() + timezoneOffsetSeconds * 1000);
 
     const suggestions: WeatherSuggestion[] = [];
-    const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+    const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
     // Check tomorrow and the next 7 days (7 days in total, i from 1 to 7)
     for (let i = 1; i <= 7; i++) {
@@ -68,46 +68,23 @@ export async function getFutureWeather(city: string): Promise<WeatherSuggestion[
         const parsed = parseForecastItem(bestItem, targetDate);
         const suitable = checkRunningCriteria(parsed);
 
-        // Get Chinese weather name
         const cond = bestItem.weather?.[0]?.main || 'Clear';
-        const desc = parsed.description.toLowerCase();
-        const condLower = cond.toLowerCase();
-
-        let weatherName = '晴天';
-        if (condLower.includes('clear') || desc.includes('clear')) {
-          weatherName = '晴天';
-        } else if (condLower.includes('cloud') || desc.includes('cloud')) {
-          weatherName = '多云';
-        } else if (condLower.includes('rain') || desc.includes('rain')) {
-          weatherName = '有雨';
-        } else if (condLower.includes('drizzle') || desc.includes('drizzle')) {
-          weatherName = '毛毛雨';
-        } else if (condLower.includes('storm') || desc.includes('storm')) {
-          weatherName = '雷雨';
-        } else if (condLower.includes('snow') || desc.includes('snow')) {
-          weatherName = '有雪';
-        } else if (condLower.includes('mist') || condLower.includes('fog') || desc.includes('mist') || desc.includes('fog')) {
-          weatherName = '有雾';
-        } else if (condLower.includes('haze') || desc.includes('haze')) {
-          weatherName = '有霾';
-        } else {
-          weatherName = cond;
-        }
+        const weatherName = cond.charAt(0).toUpperCase() + cond.slice(1).toLowerCase();
 
         // Build reason
         let reason = '';
         const tempRound = Math.round(parsed.temp);
         if (suitable) {
-          reason = `${weatherName}，${tempRound}°C，适合晨跑`;
+          reason = `${weatherName}, ${tempRound}°C, suitable for a morning run`;
         } else {
           if (parsed.temp >= 25) {
-            reason = `温度过高 (${tempRound}°C)，不适合晨跑`;
+            reason = `Temperature too high (${tempRound}°C), not suitable for a morning run`;
           } else if (parsed.hasRain) {
-            reason = `天气不佳 (${weatherName})，不适合晨跑`;
+            reason = `Weather is unfavorable (${weatherName}), not suitable for a morning run`;
           } else if (parsed.pop >= 0.3) {
-            reason = `降水概率过高 (${Math.round(parsed.pop * 100)}%)，不适合晨跑`;
+            reason = `Precipitation probability too high (${Math.round(parsed.pop * 100)}%), not suitable for a morning run`;
           } else {
-            reason = `${weatherName}，不适合晨跑`;
+            reason = `${weatherName}, not suitable for a morning run`;
           }
         }
 

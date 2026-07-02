@@ -53,8 +53,8 @@ export async function planFutureRunsForUser(userId: string): Promise<{
           await prisma.event.create({
             data: {
               userId: user.id,
-              title: '晨跑',
-              description: `天气建议: ${day.reason}`,
+              title: 'Morning Run',
+              description: `Weather suggestion: ${day.reason}`,
               startTime: day.startTime,
               endTime: day.endTime,
               location: user.location,
@@ -69,8 +69,8 @@ export async function planFutureRunsForUser(userId: string): Promise<{
     }
 
     const message = suggestionsCreated > 0
-      ? `天气检查完成，在未来7天内为您找到了 ${suggestionsCreated} 个合适晨跑的时间段，已放入待处理列表。`
-      : '天气检查完成，但未来7天内没有合适的天气或已有相同的晨跑规划。';
+      ? `Weather check completed. Found ${suggestionsCreated} suitable morning run slots in the next 7 days, added to the pending queue.`
+      : 'Weather check completed. No suitable weather slots or existing duplicate morning run schedules found in the next 7 days.';
 
     return {
       success: true,
