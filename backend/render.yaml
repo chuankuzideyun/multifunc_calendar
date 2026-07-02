@@ -4,6 +4,7 @@ services:
     env: node
     region: oregon
     plan: free
+    rootDir: backend
     buildCommand: npm install && npm run build && node node_modules/prisma/build/index.js generate
     startCommand: npm run start
     envVars:
